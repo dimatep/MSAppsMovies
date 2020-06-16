@@ -6,12 +6,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".Activities.MovieDetailsActivity"
-    android:padding="8dp">
+    >
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/CustomToolbarStyle"
+        android:id="@+id/movie_detail_toolbar"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_weight="2"
         android:orientation="horizontal"
         android:gravity="center"
         android:id="@+id/movie_image_ll">
@@ -22,34 +29,6 @@
             android:scaleType="fitCenter"
             android:id="@+id/movie_image_iv_details"
             android:src="@drawable/logo_ic"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:id="@+id/movie_title_ll">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Movie Title :"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:textSize="20sp"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="20sp"
-            android:id="@+id/movie_title_tv_details"/>
 
     </LinearLayout>
 
@@ -75,8 +54,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:id="@+id/movie_release_year_tv_details"/>
 
     </LinearLayout>
@@ -103,8 +81,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:id="@+id/movie_rating_tv_details"/>
 
     </LinearLayout>
@@ -131,8 +108,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:id="@+id/movie_genres_tv_details"/>
 
     </LinearLayout>

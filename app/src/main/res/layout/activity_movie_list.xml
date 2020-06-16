@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Activities.MovieListActivity">
+    tools:context=".Activities.MovieListActivity"
+    android:id="@+id/movies_list_fl">
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/movies_rv"
-        android:layout_margin="16dp"/>
+        android:layout_margin="10dp"/>
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

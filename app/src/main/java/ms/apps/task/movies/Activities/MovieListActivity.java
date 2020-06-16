@@ -5,13 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 
@@ -21,6 +21,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import ms.apps.task.movies.Adapters.RecyclerViewAdapter;
 import ms.apps.task.movies.Database.DataBaseHandler;
@@ -41,20 +43,19 @@ import ms.apps.task.movies.R;
 
 public class MovieListActivity extends AppCompatActivity {
 
-    private String TAG = MovieListActivity.class.getSimpleName();
-
-    //private ListView moviesListView;
     private FloatingActionButton addFab;
     private ProgressDialog pDialog;
 
     // URL to get the movies JSON
     private final static String url = "https://api.androidhive.info/json/movies.json";
 
-    private final static int ADD_MOVIE_ACTIVITY_CODE = 1;
+    public final static String EXTRA_MOVIE_DETAILS = "extra_movie_details";
+
     private JsonArrayRequest request;
     private RequestQueue requestQueue;
     private ArrayList<Movie> moviesList;
     private RecyclerView moviesRecycleView;
+    private FrameLayout recyclerViewMovieListLayout;
 
     private DataBaseHandler dbHandler;
 
@@ -66,12 +67,9 @@ public class MovieListActivity extends AppCompatActivity {
         moviesList = new ArrayList<>();
         addFab = findViewById(R.id.add_movie_fab);
         moviesRecycleView = findViewById(R.id.movies_rv);
+        recyclerViewMovieListLayout = findViewById(R.id.movies_list_fl);
         dbHandler = new DataBaseHandler(this);
-
         getMovieListFromDB();
-
-
-//        jsonRequest();
 
         addFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,11 +95,11 @@ public class MovieListActivity extends AppCompatActivity {
         moviesRecycleView.setHasFixedSize(true);
         moviesRecycleView.setAdapter(mAdapter);
 
-        mAdapter.setListener(new RecyclerViewAdapter.MoviesListener() {
+        mAdapter.setOnClickMovieListListener(new RecyclerViewAdapter.MoviesListListener() {
             @Override
-            public void OnMovieClicked(int position, View view) {
-                Intent intent = new Intent(MovieListActivity.this, MovieDetailsActivity.class);
-                intent.putExtra("movie",position);
+            public void OnMovieClicked(int position, Movie model) {
+                Intent intent = new Intent(MovieListActivity.this,MovieDetailsActivity.class);
+                intent.putExtra(EXTRA_MOVIE_DETAILS, model);
                 startActivity(intent);
             }
         });
@@ -155,7 +153,7 @@ public class MovieListActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
+                    Toast.makeText(MovieListActivity.this, "Failed Loading Data! Please try again", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -203,6 +201,17 @@ public class MovieListActivity extends AppCompatActivity {
         integrator.initiateScan();
     }
 
+    public boolean containsName(final ArrayList<Movie> list, final String name){
+        if (list.stream().filter(new Predicate<Movie>() {
+            @Override
+            public boolean test(Movie o) {
+                return o.getTitle().equals(name);
+            }
+        }).findFirst().isPresent())
+            return true;
+        else return false;
+    }
+
     // getting the new movie by scanning json QRCode
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -210,25 +219,47 @@ public class MovieListActivity extends AppCompatActivity {
 
         if(result != null){
             if(result.getContents() != null){
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(result.getContents());
-                builder.setTitle("Scanning Result");
-                builder.setPositiveButton("Scan Again", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        scanQRCode();
-                    }
-                });
+                try{
+                    //create new Movie object and get all the data from it
+                    Movie newMovie = new Movie();
+                    JSONObject obj = new JSONObject(result.getContents());
 
-                builder.setNegativeButton("Finish", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
+                    newMovie.setTitle(obj.getString("title"));
+                    newMovie.setReleaseYear(obj.getString("releaseYear"));
+                    newMovie.setRating(obj.getString("rating"));
+                    newMovie.setImage_url(obj.getString("image"));
 
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                    //get the genres array
+                    ArrayList<String> genresData = new ArrayList<>();
+                    JSONArray genreArray = obj.getJSONArray("genre");
+                    for(int i=0 ; i < genreArray.length(); i++) {
+                        genresData.add(genreArray.get(i).toString());
+                    }
+                    newMovie.setGenre(genresData.toString());
+
+                    Log.e("newMovie",newMovie.getTitle()+ " " + newMovie.getReleaseYear()
+                            + " " + newMovie.getRating()
+                            + " " + newMovie.getGenre()
+                            + " " + newMovie.getImage_url());
+
+                    if(containsName(moviesList,newMovie.getTitle())){ // check if we have this movie in array list
+                        Log.e("isContains","Contains");
+                        // show snack bar
+                        Snackbar.make(recyclerViewMovieListLayout,
+                                "Current movie already exist in the Database",
+                                Snackbar.LENGTH_LONG).show();
+
+                    }else{ //do not contains in database - add the movie to list
+                        Log.e("isContains","notContains");
+                        // add to the list and update the recycler view
+                        DataBaseHandler db = new DataBaseHandler(this);
+                        db.addMovie(newMovie);
+                        getMovieListFromDB();
+                        Toast.makeText(this, "New Movie as been added", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
             else {
                 Toast.makeText(this, "No Results", Toast.LENGTH_SHORT).show();

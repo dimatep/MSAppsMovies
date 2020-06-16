@@ -20,6 +20,7 @@ import ms.apps.task.movies.R;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder>{
 
+    private MoviesListListener listener = null; //click listener
     private Context mContext;
     private List<Movie> movies;
     private RequestOptions option;
@@ -32,13 +33,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         option = new RequestOptions().centerCrop().placeholder(R.drawable.loading_shape).error(R.drawable.loading_shape);
     }
 
-    public interface MoviesListener{
-        void OnMovieClicked(int position, View view);
+    public interface MoviesListListener{
+        void OnMovieClicked(int position, Movie model);
     }
 
-    MoviesListener listener; //click listener
 
-    public void setListener(MoviesListener listener){
+
+    public void setOnClickMovieListListener(MoviesListListener listener){
         this.listener = listener;
     }
 
@@ -54,15 +55,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
+        final Movie model = movies.get(position);
 
-        holder.movie_title.setText(movies.get(position).getTitle());
-        holder.movie_rating.setText(movies.get(position).getRating());
-        holder.movie_release_year.setText(movies.get(position).getReleaseYear());
-        holder.movie_genres.setText(movies.get(position).getGenre());
-
+        holder.movie_title.setText(model.getTitle());
+        holder.movie_rating.setText(model.getRating());
+        holder.movie_release_year.setText(model.getReleaseYear());
+        holder.movie_genres.setText(model.getGenre());
         // parse image url and set it to image view
-        Glide.with(mContext).load(movies.get(position).getImage_url()).apply(option).into(holder.movie_image);
+        Glide.with(mContext).load(model.getImage_url()).apply(option).into(holder.movie_image);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(listener != null){
+                    listener.OnMovieClicked(position,model);
+                }
+            }
+        });
     }
 
     @Override
@@ -87,15 +97,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             movie_genres = itemView.findViewById(R.id.movie_genre_tv);
             movie_image = itemView.findViewById(R.id.movie_image_iv);
 
-            // set click listener to every movie on the list to get to details activity
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(listener!=null){
-                        listener.OnMovieClicked(getAdapterPosition(), v);
-                    }
-                }
-            });
+//            // set click listener to every movie on the list to get to details activity
+//            itemView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if(listener!=null){
+//                        listener.OnMovieClicked(getAdapterPosition(), v);
+//                    }
+//                }
+//            });
         }
     }
 }

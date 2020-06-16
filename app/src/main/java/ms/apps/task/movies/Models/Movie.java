@@ -1,16 +1,27 @@
 package ms.apps.task.movies.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.BaseColumns;
 
-import java.util.ArrayList;
 
-public class Movie{
+public class Movie implements Parcelable {
 
     private String title;
     private String image_url;
     private String rating;
     private String releaseYear;
     private String genre;
+
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(image_url);
+        dest.writeString(rating);
+        dest.writeString(releaseYear);
+        dest.writeString(genre);
+    }
 
     public class MovieEntry implements BaseColumns {
         public static final String TABLE_MOVIES = "MoviesTable";
@@ -70,5 +81,32 @@ public class Movie{
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    //bring it to a format that allow us to pass it to our intent
+
+    protected Movie(Parcel in) {
+        title = in.readString();
+        image_url = in.readString();
+        rating = in.readString();
+        releaseYear = in.readString();
+        genre = in.readString();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }
