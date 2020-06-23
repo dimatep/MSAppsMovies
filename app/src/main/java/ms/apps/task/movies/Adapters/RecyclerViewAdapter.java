@@ -61,7 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.movie_title.setText(model.getTitle());
         holder.movie_rating.setText(model.getRating());
         holder.movie_release_year.setText(model.getReleaseYear());
-        holder.movie_genres.setText(model.getGenre());
+        holder.movie_genres.setText(model.getGenre().toString());
         // parse image url and set it to image view
         Glide.with(mContext).load(model.getImage_url()).apply(option).into(holder.movie_image);
 

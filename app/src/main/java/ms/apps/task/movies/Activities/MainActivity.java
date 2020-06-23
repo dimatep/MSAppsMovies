@@ -2,7 +2,15 @@ package ms.apps.task.movies.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import ms.apps.task.movies.Models.Movie;
 import ms.apps.task.movies.R;
@@ -24,5 +32,42 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // check for network connection
+        if (isNetworkAvailable(this)) {
+            Intent intent = new Intent(MainActivity.this, MovieListActivity.class);
+            startActivity(intent);
+            finish();
+        }else{
+            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isNetworkAvailable(Context context){
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            Network network = connectivityManager.getActiveNetwork();
+            if(network == null){
+                return false; //if empty return false
+            }
+
+            NetworkCapabilities activeNetwork = connectivityManager.getNetworkCapabilities(network);
+            if(activeNetwork == null){
+                return false; //if empty return false
+            }
+
+            if(activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                return true;
+            }else {
+                return false;
+            }
+
+        }else{
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return ((networkInfo != null) && networkInfo.isConnectedOrConnecting());
+        }
     }
 }

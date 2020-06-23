@@ -6,4 +6,25 @@
     android:orientation="vertical"
     tools:context=".Activities.MainActivity">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/no_connecion_ic"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="No Internet Connection!\n\n Please Try Again."
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textSize="26sp"
+        android:textColor="@color/colorPrimaryDark"/>
+    </FrameLayout>
+
 </LinearLayout>

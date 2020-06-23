@@ -58,7 +58,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     public void assignAllMovieInfo(){
         movieYear.setText(movie.getReleaseYear());
-        movieGenres.setText(movie.getGenre());
+        movieGenres.setText(movie.getGenre().toString());
         movieRating.setText(movie.getRating());
         Glide.with(this).load(movie.getImage_url()).into(movieImage);
     }

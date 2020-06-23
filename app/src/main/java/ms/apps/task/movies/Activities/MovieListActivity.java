@@ -22,6 +22,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -69,6 +70,7 @@ public class MovieListActivity extends AppCompatActivity {
         moviesRecycleView = findViewById(R.id.movies_rv);
         recyclerViewMovieListLayout = findViewById(R.id.movies_list_fl);
         dbHandler = new DataBaseHandler(this);
+
         getMovieListFromDB();
 
         addFab.setOnClickListener(new View.OnClickListener() {
@@ -106,7 +108,7 @@ public class MovieListActivity extends AppCompatActivity {
     }
 
     private class GetMovies extends AsyncTask<Void, Void, Void> {
-        @Override
+        @Override //show progress dialog if
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(MovieListActivity.this);
@@ -140,13 +142,12 @@ public class MovieListActivity extends AppCompatActivity {
                             movie.setGenre(genresData.toString());
 
                             dbHandler.addMovie(movie);//add movie to db
-                            moviesList.add(movie); //add all the movies to array list
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
-
+                    getMovieListFromDB();
                     sortMoviesByReleaseYearASC(); //sort from newest to oldest
                     setupRecyclerView(moviesList); // set the recycler view adapter
                 }
@@ -216,7 +217,6 @@ public class MovieListActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data);
-
         if(result != null){
             if(result.getContents() != null){
                 try{

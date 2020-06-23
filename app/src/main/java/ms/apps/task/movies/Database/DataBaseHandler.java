@@ -2,20 +2,11 @@ package ms.apps.task.movies.Database;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import ms.apps.task.movies.Models.Movie;
@@ -57,7 +48,7 @@ public class DataBaseHandler extends SQLiteOpenHelper {
         movieValues.put(Movie.MovieEntry.COLUMN_IMAGE,movie.getImage_url());
         movieValues.put(Movie.MovieEntry.COLUMN_RATING,movie.getRating());
         movieValues.put(Movie.MovieEntry.COLUMN_RELEASE_YEAR,movie.getReleaseYear());
-        movieValues.put(Movie.MovieEntry.COLUMN_GENRE,movie.getGenre().toString());
+        movieValues.put(Movie.MovieEntry.COLUMN_GENRE,movie.getGenre());
 
         long result = db.insert(Movie.MovieEntry.TABLE_MOVIES,null,movieValues);
         db.close();
@@ -94,61 +85,5 @@ public class DataBaseHandler extends SQLiteOpenHelper {
 
         return moviesList;
 
-    }
-
-    private void readDataToDB(SQLiteDatabase db) throws IOException, JSONException {
-        final String MOVIE_TITLE = "title";
-        final String MOVIE_RELEASE_YEAR = "releaseYear";
-        final String MOVIE_RATING = "rating";
-        final String MOVIE_IMAGE = "image";
-        final String MOVIE_GENRE = "genre";
-
-        try {
-            String jsonDataString = readJsonDataFromFile();
-            JSONArray movieItemsJsonArray = new JSONArray(jsonDataString);
-
-            for (int i = 0; i < movieItemsJsonArray.length(); i++) {
-                JSONObject movieItemObject = movieItemsJsonArray.getJSONObject(i);
-
-                String title = movieItemObject.getString(MOVIE_TITLE);
-                String release_year = movieItemObject.getString(MOVIE_RELEASE_YEAR);
-                String rating = movieItemObject.getString(MOVIE_RATING);
-                String image = movieItemObject.getString(MOVIE_IMAGE);
-                String genre = movieItemObject.getString(MOVIE_GENRE);
-
-                ContentValues movieValues = new ContentValues();
-
-                movieValues.put(Movie.MovieEntry.COLUMN_TITLE,title);
-                movieValues.put(Movie.MovieEntry.COLUMN_IMAGE,image);
-                movieValues.put(Movie.MovieEntry.COLUMN_RATING,rating);
-                movieValues.put(Movie.MovieEntry.COLUMN_RELEASE_YEAR,release_year);
-                movieValues.put(Movie.MovieEntry.COLUMN_GENRE,genre);
-
-                db.insert(Movie.MovieEntry.TABLE_MOVIES, null, movieValues);
-
-            }
-        }catch (JSONException e){
-            e.printStackTrace();
-        }
-    }
-
-    private String readJsonDataFromFile() throws IOException{
-        InputStream inputStream = null;
-        StringBuilder builder = new StringBuilder();
-
-        try{
-            String jsonDataString = null;
-            //inputStream = mResources.openRawResource();
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream, "UTF-8"));
-            while ((jsonDataString = bufferedReader.readLine()) != null){
-                builder.append(jsonDataString);
-            }
-        }finally {
-            if(inputStream != null)
-                inputStream.close();
-        }
-
-        return new String(builder);
     }
 }
