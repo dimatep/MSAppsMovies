@@ -12,6 +12,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import ms.apps.task.movies.Database.DataBaseHandler;
 import ms.apps.task.movies.Models.Movie;
 import ms.apps.task.movies.R;
 
@@ -28,13 +31,19 @@ public class MainActivity extends AppCompatActivity {
      * @since   16/06/2020
      */
 
+    private DataBaseHandler db = null;
+    private ArrayList<Movie> moviesList = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        db = new DataBaseHandler(this);
+        moviesList = db.getAllMovies();
 
         // check for network connection
-        if (isNetworkAvailable(this)) {
+        // if there are movies on database but no internet connection show the movieListActivity
+        if (isNetworkAvailable(this) || moviesList.size() > 0) {
             Intent intent = new Intent(MainActivity.this, MovieListActivity.class);
             startActivity(intent);
             finish();
